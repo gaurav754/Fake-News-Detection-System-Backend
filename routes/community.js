@@ -53,4 +53,19 @@ router.patch('/:id/upvote', auth, async (req, res) => {
   }
 })
 
+router.patch('/:id/downvote', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (post.downvotedBy.includes(req.user.id))
+      return res.status(400).json({ message: 'Already downvoted' })
+    post.downvotes += 1
+    post.downvotedBy.push(req.user.id)
+    await post.save()
+    res.json(post)
+  } catch {
+    res.status(500).json({ message: 'Server error' })
+  }
+})
+
 module.exports = router
